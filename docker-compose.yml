@@ -6,7 +6,7 @@ services:
     build:
       context: .
       dockerfile: deploy/Dockerfile
-    container_name: perkos-pay
+    container_name: ${PERKOS_PAY_CONTAINER_NAME:-perkos-pay}
     restart: unless-stopped
     environment:
       PERKOS_PAY_ENV: ${PERKOS_PAY_ENV:-production}
