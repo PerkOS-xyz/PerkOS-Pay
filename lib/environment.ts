@@ -17,7 +17,10 @@ export const payEnvironmentSchema = z.discriminatedUnion("name", [
 
 export type PayEnvironment = z.infer<typeof payEnvironmentSchema>;
 
-export function environmentFor(name: string | undefined): PayEnvironment {
+export function environmentFor(
+  name: string | undefined,
+  testOrigin?: string,
+): PayEnvironment {
   if (name === "production") {
     return {
       name: "production",
@@ -29,10 +32,23 @@ export function environmentFor(name: string | undefined): PayEnvironment {
 
   return {
     name: "test",
-    origin: "https://test.pay.perkos.xyz",
+    origin: parseTestOrigin(testOrigin),
     stripeMode: "test",
     cryptoMode: "testnet",
   };
+}
+
+function parseTestOrigin(origin: string | undefined) {
+  if (!origin) return "https://test.pay.perkos.xyz" as const;
+
+  const url = new URL(origin);
+  const isLocalhost = url.protocol === "http:" && url.hostname === "localhost";
+  const isTestSite =
+    url.protocol === "https:" && url.hostname === "test.pay.perkos.xyz";
+  if (!isLocalhost && !isTestSite) {
+    throw new Error("Test payment origin is not allowlisted");
+  }
+  return origin as "https://test.pay.perkos.xyz";
 }
 
 export function assertEnvironmentBinding(input: {
@@ -48,4 +64,3 @@ export function assertEnvironmentBinding(input: {
     throw new Error("Stripe mode does not match the configured environment");
   }
 }
-

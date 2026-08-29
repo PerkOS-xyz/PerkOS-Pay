@@ -15,9 +15,10 @@ PerkOS Stack verifies and settles supported crypto payments.
 
 ## Current status
 
-The repository is an executable safety-first scaffold. Checkout actions remain
-disabled until PerkOS API publishes the environment-bound billing-session
-contract. No live payment credentials or handlers exist here yet.
+Stripe Test Checkout and a signature-verified, idempotent webhook are available
+for isolated validation. Verified events remain `verified_pending_credit`; they
+never change PerkOS balances. Production Checkout remains disabled until PerkOS
+API publishes the environment-bound billing-session contract.
 
 ## Development
 
@@ -28,6 +29,19 @@ cp .env.example .env.local
 pnpm install
 pnpm run dev
 ```
+
+For explicit local and QA templates, use `.env.dev` and `.env.qa`. Both commit
+only empty secret placeholders. Run Next with a copied `.env.local` file or
+inject the selected template through your process manager.
+
+Stripe Test webhook endpoint:
+
+```text
+https://test.pay.perkos.xyz/api/stripe/webhook
+```
+
+Subscribe it to `checkout.session.completed`. Stripe requires the unmodified
+request body and the endpoint-specific `whsec_...` secret.
 
 Verification:
 

@@ -12,6 +12,12 @@ services:
       PERKOS_PAY_ENV: ${PERKOS_PAY_ENV:-production}
       PERKOS_API_URL: ${PERKOS_API_URL:-http://perkos-api:8080}
       PERKOS_PAYMENTS_ENABLED: ${PERKOS_PAYMENTS_ENABLED:-false}
+      PERKOS_PAY_ORIGIN: ${PERKOS_PAY_ORIGIN:-https://pay.perkos.xyz}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      PAYMENT_EVENT_STORE: /data/payment-events
+    volumes:
+      - payment_events:/data/payment-events
     networks:
       - shared
     healthcheck:
@@ -26,3 +32,5 @@ networks:
     external: true
     name: ${PERKOS_PAY_NETWORK:-perkos-knowledge_default}
 
+volumes:
+  payment_events:

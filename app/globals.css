@@ -64,7 +64,8 @@ h1 { margin: 8px 0 12px; font-size: clamp(38px, 7vw, 66px); line-height: .98; le
 .currency { color: var(--muted); border: 1px solid var(--border); border-radius: 999px; padding: 7px 10px; font-size: 12px; }
 
 .packs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 26px 0; }
-.packs button { min-height: 86px; border: 1px solid var(--border); background: rgba(255,255,255,.025); color: var(--text); border-radius: 14px; }
+.packs form { display: flex; }
+.packs button { width: 100%; min-height: 86px; border: 1px solid var(--border); background: rgba(255,255,255,.025); color: var(--text); border-radius: 14px; }
 .packs button span { display: block; font-size: 24px; font-weight: 750; }
 .packs button small { display: block; color: var(--muted); margin-top: 6px; font-size: 10px; }
 .packs button:disabled { opacity: .64; }
@@ -72,6 +73,7 @@ h1 { margin: 8px 0 12px; font-size: clamp(38px, 7vw, 66px); line-height: .98; le
 .payment-methods { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .payment-methods button { min-height: 48px; border-radius: 12px; font-weight: 750; }
 .primary { color: white; border: 0; background: linear-gradient(100deg, var(--pink), var(--violet)); }
+.method-label { min-height: 48px; border-radius: 12px; font-weight: 750; display: grid; place-items: center; }
 .secondary { color: var(--text); border: 1px solid var(--border); background: var(--panel-strong); }
 .payment-methods button:disabled { cursor: not-allowed; opacity: .48; }
 .notice { color: var(--muted); text-align: center; font-size: 12px; margin: 18px 0 0; }
@@ -79,6 +81,11 @@ h1 { margin: 8px 0 12px; font-size: clamp(38px, 7vw, 66px); line-height: .98; le
 .trust-row { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px 24px; color: var(--muted); font-size: 12px; margin-top: 20px; }
 .trust-row span::before { content: "✓"; color: var(--mint); margin-right: 6px; }
 footer { width: min(1120px, calc(100% - 40px)); margin: auto auto 0; padding: 24px 0 30px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; gap: 20px; color: #777185; font-size: 11px; }
+.result-shell { display: grid; place-items: center; padding: 24px; }
+.result-card { width: min(600px, 100%); background: var(--panel); border: 1px solid var(--border); border-radius: 24px; padding: 36px; text-align: center; }
+.result-card h1 { font-size: clamp(34px, 7vw, 54px); }
+.result-card p:not(.eyebrow) { color: var(--muted); line-height: 1.65; }
+.result-card a { display: inline-block; margin-top: 12px; color: white; background: linear-gradient(100deg, var(--pink), var(--violet)); padding: 13px 18px; border-radius: 12px; text-decoration: none; font-weight: 750; }
 
 @media (max-width: 620px) {
   .shell { margin-top: 4vh; }
@@ -87,4 +94,3 @@ footer { width: min(1120px, calc(100% - 40px)); margin: auto auto 0; padding: 24
   .payment-methods { grid-template-columns: 1fr; }
   footer { flex-direction: column; }
 }
-

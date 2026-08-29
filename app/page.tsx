@@ -1,6 +1,5 @@
 import { getRuntimeConfig } from "@/lib/runtime";
-
-const creditPacks = [10, 25, 50, 100];
+import { creditPacks } from "@/lib/catalog";
 
 export default function Home() {
   const { environment, paymentsEnabled } = getRuntimeConfig();
@@ -38,26 +37,31 @@ export default function Home() {
           </div>
 
           <div className="packs" aria-label="Credit packs">
-            {creditPacks.map((amount) => (
-              <button key={amount} type="button" disabled={!paymentsEnabled}>
-                <span>${amount}</span>
-                <small>{amount === 25 ? "Most popular" : "PerkOS credits"}</small>
-              </button>
+            {Object.entries(creditPacks).map(([packId, pack]) => (
+              <form action="/api/checkout" method="post" key={packId}>
+                <button
+                  name="packId"
+                  value={packId}
+                  type="submit"
+                  disabled={!paymentsEnabled || !isTest}
+                >
+                  <span>${pack.credits}</span>
+                  <small>{pack.credits === 25 ? "Most popular" : "PerkOS credits"}</small>
+                </button>
+              </form>
             ))}
           </div>
 
           <div className="payment-methods">
-            <button className="primary" type="button" disabled>
-              Pay with card
-            </button>
+            <div className="primary method-label">Stripe Checkout</div>
             <button className="secondary" type="button" disabled>
               Pay with crypto
             </button>
           </div>
 
           <p className="notice">
-            {paymentsEnabled
-              ? "Select a credit pack to continue."
+            {paymentsEnabled && isTest
+              ? "Select a credit pack to open Stripe Test Checkout. No balance will be credited."
               : "Checkout activation is pending the PerkOS API billing-session contract."}
           </p>
         </section>
@@ -76,4 +80,3 @@ export default function Home() {
     </main>
   );
 }
-

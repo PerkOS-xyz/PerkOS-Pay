@@ -38,5 +38,13 @@ describe("payment environment isolation", () => {
       }),
     ).toThrow(/Stripe mode/);
   });
-});
 
+  it("allows localhost only as an explicit test origin", () => {
+    expect(environmentFor("test", "http://localhost:3000").origin).toBe(
+      "http://localhost:3000",
+    );
+    expect(() => environmentFor("test", "https://evil.example")).toThrow(
+      /allowlisted/,
+    );
+  });
+});
