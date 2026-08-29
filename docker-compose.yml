@@ -1,0 +1,28 @@
+# Production compose for pay.perkos.xyz on the main PerkOS VPS.
+# Caddy reaches the container over the existing shared Docker network.
+
+services:
+  pay:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile
+    container_name: perkos-pay
+    restart: unless-stopped
+    environment:
+      PERKOS_PAY_ENV: ${PERKOS_PAY_ENV:-production}
+      PERKOS_API_URL: ${PERKOS_API_URL:-http://perkos-api:8080}
+      PERKOS_PAYMENTS_ENABLED: ${PERKOS_PAYMENTS_ENABLED:-false}
+    networks:
+      - shared
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+
+networks:
+  shared:
+    external: true
+    name: ${PERKOS_PAY_NETWORK:-perkos-knowledge_default}
+

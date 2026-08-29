@@ -25,15 +25,29 @@ Requires Node.js 22 or newer.
 
 ```bash
 cp .env.example .env.local
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 Verification:
 
 ```bash
-npm run verify
+pnpm run verify
 ```
+
+## VPS deployment
+
+Production runs as the `perkos-pay` container on the shared PerkOS Docker
+network. Caddy terminates TLS and routes `pay.perkos.xyz` to port 3000.
+
+```bash
+docker compose build pay
+docker compose up -d pay
+docker inspect perkos-pay --format '{{.State.Health.Status}}'
+```
+
+The initial deployment must keep `PERKOS_PAYMENTS_ENABLED=false`. Enabling it
+before the environment-bound billing-session contract exists is unsupported.
 
 ## Safety invariants
 
@@ -43,4 +57,3 @@ npm run verify
 - Payment sessions bind environment, billing account, organization, origin,
   return URL, nonce, and expiration.
 - Crypto options are discovered from Stack capabilities rather than assumed.
-
