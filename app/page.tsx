@@ -1,6 +1,8 @@
 import { getRuntimeConfig } from "@/lib/runtime";
 import { creditPacks } from "@/lib/catalog";
 
+export const dynamic = "force-dynamic";
+
 export default function Home() {
   const { environment, paymentsEnabled } = getRuntimeConfig();
   const isTest = environment.name === "test";
