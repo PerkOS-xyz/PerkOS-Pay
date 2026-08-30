@@ -32,7 +32,10 @@ export async function POST(request: Request) {
           price_data: {
             currency: "usd",
             unit_amount: pack.amountCents,
-            product_data: { name: `${pack.credits} PerkOS usage credits` },
+            product_data: {
+              name: `${pack.credits} PerkOS usage credits`,
+              tax_code: "txcd_10103001",
+            },
           },
         },
       ],
