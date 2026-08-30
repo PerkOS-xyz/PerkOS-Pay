@@ -1,11 +1,16 @@
 import { getRuntimeConfig } from "@/lib/runtime";
-import { creditPacks } from "@/lib/catalog";
 
 export const dynamic = "force-dynamic";
 
-export default function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ session?: string; checkout?: string }>;
+}) {
   const { environment, paymentsEnabled } = getRuntimeConfig();
   const isTest = environment.name === "test";
+  const { session, checkout } = await searchParams;
+  const canCheckout = Boolean(session && paymentsEnabled && isTest);
 
   return (
     <main>
@@ -33,25 +38,19 @@ export default function Home() {
           <div className="checkout-heading">
             <div>
               <p className="step">Step 1 of 2</p>
-              <h2 id="checkout-title">Choose an amount</h2>
+              <h2 id="checkout-title">Confirm secure checkout</h2>
             </div>
             <span className="currency">USD credits</span>
           </div>
 
-          <div className="packs" aria-label="Credit packs">
-            {Object.entries(creditPacks).map(([packId, pack]) => (
-              <form action="/api/checkout" method="post" key={packId}>
-                <button
-                  name="packId"
-                  value={packId}
-                  type="submit"
-                  disabled={!paymentsEnabled || !isTest}
-                >
-                  <span>${pack.credits}</span>
-                  <small>{pack.credits === 25 ? "Most popular" : "PerkOS credits"}</small>
-                </button>
-              </form>
-            ))}
+          <div className="packs" aria-label="Secure checkout">
+            <form action="/api/checkout" method="post">
+              <input type="hidden" name="session" value={session ?? ""} />
+              <button type="submit" disabled={!canCheckout}>
+                <span>Continue to Stripe</span>
+                <small>Amount and wallet verified by PerkOS</small>
+              </button>
+            </form>
           </div>
 
           <div className="payment-methods">
@@ -62,9 +61,11 @@ export default function Home() {
           </div>
 
           <p className="notice">
-            {paymentsEnabled && isTest
-              ? "Select a credit pack to open Stripe Test Checkout. No balance will be credited."
-              : "Checkout activation is pending the PerkOS API billing-session contract."}
+            {checkout === "cancelled"
+              ? "Checkout was cancelled. Start a new payment from PerkOS App."
+              : canCheckout
+                ? "This test session is short-lived and can only fund the wallet that created it."
+                : "Start the payment from PerkOS App to receive a secure checkout session."}
           </p>
         </section>
 
