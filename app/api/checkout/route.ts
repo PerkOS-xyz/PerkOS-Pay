@@ -50,7 +50,9 @@ export async function POST(request: Request) {
       },
       success_url: `${config.environment.origin}/result?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${config.environment.origin}/?checkout=cancelled`,
-      expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
+      // Stripe requires at least 30 full minutes at the time it receives the
+      // request, so keep a one-minute margin for network and processing time.
+      expires_at: Math.floor(Date.now() / 1000) + 31 * 60,
     });
 
     if (!session.url) throw new Error("Stripe did not return a Checkout URL");
