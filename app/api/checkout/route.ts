@@ -25,7 +25,6 @@ export async function POST(request: Request) {
     const stripe = getStripe();
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      payment_method_types: ["card"],
       client_reference_id: crypto.randomUUID(),
       line_items: [
         {
