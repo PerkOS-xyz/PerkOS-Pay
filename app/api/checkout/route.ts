@@ -59,6 +59,10 @@ export async function POST(request: Request) {
     return NextResponse.redirect(session.url, 303);
   } catch (error) {
     const isInputError = error instanceof z.ZodError;
+    console.error(
+      "Stripe Checkout creation failed:",
+      error instanceof Error ? error.message : "Unknown error",
+    );
     return NextResponse.json(
       { error: isInputError ? "Invalid credit pack" : "Checkout could not be started" },
       { status: isInputError ? 400 : 503 },
