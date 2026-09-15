@@ -1,5 +1,7 @@
 import "server-only";
 
+import { getRuntimeConfig } from "./runtime";
+
 /**
  * Billing sessions: a client that holds a PerkOS bearer (PerkOS Floor) mints a
  * session on PerkOS API and sends the person here with its id in the URL. The
@@ -17,8 +19,12 @@ export function isSessionId(value: unknown): value is string {
   return typeof value === "string" && SESSION_ID_RE.test(value);
 }
 
+/**
+ * Resolved through the runtime config so the session guard and these fetches
+ * can never disagree about which API this deployment is bound to.
+ */
 export function apiBase(): string {
-  return (process.env.PERKOS_API_URL?.trim() || "https://api.perkos.xyz").replace(/\/+$/, "");
+  return getRuntimeConfig().apiUrl;
 }
 
 export type BillingSession = {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { assertEnvironmentBinding, environmentFor } from "../lib/environment";
+import { assertEnvironmentBinding, environmentFor, sessionsAllowedFor } from "../lib/environment";
 
 describe("payment environment isolation", () => {
   it("defaults to the safe test environment", () => {
@@ -46,5 +46,31 @@ describe("payment environment isolation", () => {
     expect(() => environmentFor("test", "https://evil.example")).toThrow(
       /allowlisted/,
     );
+  });
+});
+
+describe("which deployment may serve billing sessions", () => {
+  const prod = environmentFor("production");
+  const test = environmentFor("test");
+
+  it("lets production serve its own sessions", () => {
+    expect(sessionsAllowedFor({ environment: prod, apiUrl: "http://perkos-api:8080" })).toEqual({ ok: true });
+  });
+
+  it("lets the test site serve the dev API's sessions", () => {
+    // This is the real deployment: test.pay.perkos.xyz talks to dev.api.
+    expect(sessionsAllowedFor({ environment: test, apiUrl: "https://dev.api.perkos.xyz" })).toEqual({ ok: true });
+  });
+
+  it("refuses a test deployment aimed at the production API, public or in-cluster", () => {
+    for (const apiUrl of ["https://api.perkos.xyz", "http://perkos-api:8080"]) {
+      const out = sessionsAllowedFor({ environment: test, apiUrl });
+      expect(out.ok).toBe(false);
+      expect(out).toMatchObject({ reason: expect.stringMatching(/production billing sessions/) });
+    }
+  });
+
+  it("refuses rather than guesses when the API origin is not a URL", () => {
+    expect(sessionsAllowedFor({ environment: test, apiUrl: "" }).ok).toBe(false);
   });
 });
