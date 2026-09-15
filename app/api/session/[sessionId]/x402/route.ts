@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { getRuntimeConfig } from "@/lib/runtime";
+import { sessionsAllowed } from "@/lib/runtime";
 import { fetchBillingSession, forwardX402, isSessionId } from "@/lib/session";
 
 export const runtime = "nodejs";
@@ -14,9 +14,8 @@ export const runtime = "nodejs";
 export async function POST(request: Request, ctx: { params: Promise<{ sessionId: string }> }) {
   const { sessionId } = await ctx.params;
   if (!isSessionId(sessionId)) return NextResponse.json({ error: "Session not found" }, { status: 404 });
-  if (getRuntimeConfig().environment.name !== "production") {
-    return NextResponse.json({ error: "Sessions are served on pay.perkos.xyz" }, { status: 403 });
-  }
+  const allowed = sessionsAllowed();
+  if (!allowed.ok) return NextResponse.json({ error: allowed.reason }, { status: 403 });
   const { session } = await fetchBillingSession(sessionId);
   if (!session) return NextResponse.json({ error: "Session not found" }, { status: 404 });
   if (session.status !== "open") return NextResponse.json({ error: "Session expired" }, { status: 410 });

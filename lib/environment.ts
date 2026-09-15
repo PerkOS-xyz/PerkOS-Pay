@@ -51,6 +51,40 @@ function parseTestOrigin(origin: string | undefined) {
   return origin as "https://test.pay.perkos.xyz";
 }
 
+/**
+ * Hostnames that serve production billing sessions, public and in-cluster.
+ * A test deployment pointed at one of these would be serving live sessions
+ * from a site whose Stripe and chain modes are test.
+ */
+const PRODUCTION_API_HOSTS = new Set(["api.perkos.xyz", "perkos-api"]);
+
+/**
+ * Whether this deployment may serve billing sessions.
+ *
+ * The binding that matters is which API mints the sessions, not the name of
+ * the environment: `test.pay` talks to `dev.api`, so its sessions are dev
+ * sessions and serving them is correct. What must never happen is a test
+ * deployment reaching the production API, which would put live sessions behind
+ * test-mode Stripe and testnet settlement.
+ */
+export function sessionsAllowedFor(input: {
+  environment: PayEnvironment;
+  apiUrl: string;
+}): { ok: true } | { ok: false; reason: string } {
+  if (input.environment.name === "production") return { ok: true };
+
+  let host: string;
+  try {
+    host = new URL(input.apiUrl).hostname;
+  } catch {
+    return { ok: false, reason: "The API origin for this deployment is not a URL" };
+  }
+  if (PRODUCTION_API_HOSTS.has(host)) {
+    return { ok: false, reason: "A test deployment cannot serve production billing sessions" };
+  }
+  return { ok: true };
+}
+
 export function assertEnvironmentBinding(input: {
   environment: PayEnvironment;
   requestOrigin: string;

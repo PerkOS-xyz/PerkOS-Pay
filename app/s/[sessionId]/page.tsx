@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { getRuntimeConfig } from "@/lib/runtime";
+import { getRuntimeConfig, onrampAllowed, sessionsAllowed } from "@/lib/runtime";
 import { cdpCredentials } from "@/lib/cdp";
 import { fetchBillingSession, isSessionId, shortWallet } from "@/lib/session";
 import { OnrampBuy } from "./OnrampBuy";
@@ -25,7 +25,10 @@ export default async function SessionPage({
   const { sessionId } = await params;
   const flags = await searchParams;
   const { environment } = getRuntimeConfig();
+  // "live" is about Stripe/chain mode for the badge; whether the controls
+  // work is a separate question, answered by the session binding.
   const live = environment.name === "production";
+  const canPay = sessionsAllowed().ok;
   const { session, status } = isSessionId(sessionId)
     ? await fetchBillingSession(sessionId)
     : { session: null, status: 404 };
@@ -46,7 +49,7 @@ export default async function SessionPage({
   const funded = session.infra.allowed;
   const expired = session.status === "expired";
   // Only offer card-to-USDC where the server can actually mint a session token.
-  const onrampAvailable = cdpCredentials() !== null;
+  const onrampAvailable = onrampAllowed() && cdpCredentials() !== null;
 
   return (
     <main>
@@ -100,7 +103,7 @@ export default async function SessionPage({
           <div className="packs" aria-label="Card amounts">
             {session.card.amountsUsd.map((amount) => (
               <form action={`/api/session/${session.sessionId}/checkout`} method="post" key={amount}>
-                <button name="amount" value={amount} type="submit" disabled={!live || expired || !session.card.available}>
+                <button name="amount" value={amount} type="submit" disabled={!canPay || expired || !session.card.available}>
                   <span>${amount}</span>
                   <small>{amount === 10 ? "Most popular" : "PerkOS credits"}</small>
                 </button>
@@ -114,13 +117,13 @@ export default async function SessionPage({
             {onrampAvailable ? <div className="method-label secondary">Card → USDC · Coinbase</div> : null}
           </div>
 
-          {live && !expired ? <UsdcPay sessionId={session.sessionId} wallet={session.wallet} /> : null}
+          {canPay && !expired ? <UsdcPay sessionId={session.sessionId} wallet={session.wallet} /> : null}
 
-          {live && !expired && onrampAvailable ? (
+          {canPay && !expired && onrampAvailable ? (
             <OnrampBuy sessionId={session.sessionId} wallet={session.wallet} />
           ) : null}
 
-          {live && !expired ? (
+          {canPay && !expired ? (
             <form className="coupon" action={`/api/session/${session.sessionId}/coupon`} method="post">
               <label>
                 Have a code?
@@ -131,8 +134,8 @@ export default async function SessionPage({
           ) : null}
 
           <p className="notice">
-            {!live
-              ? "Sessions are served on pay.perkos.xyz."
+            {!canPay
+              ? "This deployment cannot serve these sessions. Open the link from the app again."
               : expired
                 ? "This link expired after 30 minutes. Open a new one from the app."
                 : !session.card.available

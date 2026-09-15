@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { cdpCredentials, createOnrampSessionToken, onrampUrl } from "@/lib/cdp";
-import { getRuntimeConfig } from "@/lib/runtime";
+import { onrampAllowed, sessionsAllowed } from "@/lib/runtime";
 import { fetchBillingSession, isSessionId } from "@/lib/session";
 
 export const runtime = "nodejs";
@@ -23,8 +23,12 @@ const MAX_PRESET_USD = 500;
 export async function POST(request: Request, ctx: { params: Promise<{ sessionId: string }> }) {
   const { sessionId } = await ctx.params;
   if (!isSessionId(sessionId)) return NextResponse.json({ error: "Session not found" }, { status: 404 });
-  if (getRuntimeConfig().environment.name !== "production") {
-    return NextResponse.json({ error: "Sessions are served on pay.perkos.xyz" }, { status: 403 });
+  const allowed = sessionsAllowed();
+  if (!allowed.ok) return NextResponse.json({ error: allowed.reason }, { status: 403 });
+  // Onramp delivers real mainnet USDC whichever API minted the session, and
+  // there is no testnet onramp, so a testnet deployment must never offer it.
+  if (!onrampAllowed()) {
+    return NextResponse.json({ error: "Onramp is only available on mainnet" }, { status: 403 });
   }
 
   const credentials = cdpCredentials();

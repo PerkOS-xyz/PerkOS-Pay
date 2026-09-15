@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { getRuntimeConfig } from "@/lib/runtime";
+import { sessionsAllowed } from "@/lib/runtime";
 import { isSessionId, startSessionCheckout } from "@/lib/session";
 
 export const runtime = "nodejs";
@@ -13,11 +13,10 @@ export const runtime = "nodejs";
 export async function POST(request: Request, ctx: { params: Promise<{ sessionId: string }> }) {
   const { sessionId } = await ctx.params;
   if (!isSessionId(sessionId)) return NextResponse.json({ error: "Session not found" }, { status: 404 });
-  // Sessions are minted against the production API; the test site must not
-  // open live checkouts for them.
-  if (getRuntimeConfig().environment.name !== "production") {
-    return NextResponse.json({ error: "Sessions are served on pay.perkos.xyz" }, { status: 403 });
-  }
+  // Sessions belong to the API this deployment is bound to; a test site aimed
+  // at the production API must not open live checkouts for them.
+  const allowed = sessionsAllowed();
+  if (!allowed.ok) return NextResponse.json({ error: allowed.reason }, { status: 403 });
   const form = await request.formData().catch(() => null);
   const amount = Number(form?.get("amount"));
   if (!Number.isFinite(amount) || amount <= 0) {
