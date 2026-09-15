@@ -85,6 +85,25 @@ export async function forwardX402(input: {
   return { status: res.status, body: await res.json().catch(() => ({})) };
 }
 
+/** Coupon → credit through the API's ledger. Returns the API's error code on refusal. */
+export async function redeemSessionCoupon(
+  id: string,
+  code: string,
+): Promise<{ ok: boolean; amountUsd?: number; creditsUsd?: number; code?: string }> {
+  if (!isSessionId(id)) return { ok: false, code: "not_found" };
+  const res = await fetch(`${apiBase()}/billing/sessions/${encodeURIComponent(id)}/coupon`, {
+    method: "POST",
+    headers: { "content-type": "application/json", accept: "application/json" },
+    body: JSON.stringify({ code }),
+    signal: AbortSignal.timeout(20_000),
+  });
+  const body = (await res.json().catch(() => ({}))) as {
+    ok?: boolean; amountUsd?: number; creditsUsd?: number; error?: { code?: string };
+  };
+  if (!res.ok || !body.ok) return { ok: false, code: (body.error?.code ?? `http_${res.status}`).toLowerCase() };
+  return { ok: true, amountUsd: body.amountUsd, creditsUsd: body.creditsUsd };
+}
+
 export function shortWallet(wallet: string): string {
   return wallet.length > 12 ? `${wallet.slice(0, 6)}…${wallet.slice(-4)}` : wallet;
 }

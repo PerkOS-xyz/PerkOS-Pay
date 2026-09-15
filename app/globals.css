@@ -106,3 +106,7 @@ footer { width: min(1120px, calc(100% - 40px)); margin: auto auto 0; padding: 24
 .usdc-hint a { color: var(--text); }
 .usdc-ok { color: var(--mint); font-size: 13px; margin: 10px 0 0; }
 .usdc-err { color: var(--pink); font-size: 13px; margin: 10px 0 0; }
+.coupon { margin-top: 12px; display: flex; gap: 10px; align-items: end; flex-wrap: wrap; }
+.coupon label { display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--muted); flex: 1; }
+.coupon input { min-height: 44px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--panel-strong); color: var(--text); text-transform: uppercase; letter-spacing: .08em; }
+.coupon button { min-height: 44px; padding: 0 18px; border-radius: 12px; font-weight: 750; }

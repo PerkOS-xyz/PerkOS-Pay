@@ -18,7 +18,7 @@ export default async function SessionPage({
   searchParams,
 }: {
   params: Promise<{ sessionId: string }>;
-  searchParams: Promise<{ paid?: string; cancelled?: string; error?: string }>;
+  searchParams: Promise<{ paid?: string; cancelled?: string; error?: string; coupon?: string }>;
 }) {
   const { sessionId } = await params;
   const flags = await searchParams;
@@ -68,6 +68,20 @@ export default async function SessionPage({
           {flags.cancelled ? <p className="notice">Checkout cancelled. Nothing was charged.</p> : null}
           {flags.error === "expired" ? <p className="notice">This link expired. Open a new one from the app.</p> : null}
           {flags.error === "checkout" ? <p className="notice">Card checkout could not start. Try again or pay with USDC.</p> : null}
+          {flags.coupon === "ok" ? <p className="notice">Coupon applied. The balance above is updated; go back to the app.</p> : null}
+          {flags.coupon && flags.coupon !== "ok" ? (
+            <p className="notice">
+              {flags.coupon === "coupon_already_redeemed"
+                ? "This wallet already used that code."
+                : flags.coupon === "coupon_expired"
+                  ? "That code has expired."
+                  : flags.coupon === "coupon_exhausted"
+                    ? "That code has been fully redeemed."
+                    : flags.coupon === "http_429"
+                      ? "Too many tries. Wait a minute."
+                      : "That code is not valid."}
+            </p>
+          ) : null}
         </div>
 
         <section className="checkout" aria-labelledby="checkout-title">
@@ -96,6 +110,16 @@ export default async function SessionPage({
           </div>
 
           {live && !expired ? <UsdcPay sessionId={session.sessionId} wallet={session.wallet} /> : null}
+
+          {live && !expired ? (
+            <form className="coupon" action={`/api/session/${session.sessionId}/coupon`} method="post">
+              <label>
+                Have a code?
+                <input name="code" placeholder="COUPON" maxLength={32} autoComplete="off" spellCheck={false} required />
+              </label>
+              <button type="submit" className="secondary">Apply</button>
+            </form>
+          ) : null}
 
           <p className="notice">
             {!live
