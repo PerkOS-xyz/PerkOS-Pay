@@ -15,6 +15,9 @@ services:
       PERKOS_PAY_ORIGIN: ${PERKOS_PAY_ORIGIN:-https://pay.perkos.xyz}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      # Coinbase Onramp. Unset keeps card-to-USDC hidden and the route on 503.
+      CDP_API_KEY_ID: ${CDP_API_KEY_ID:-}
+      CDP_API_KEY_SECRET: ${CDP_API_KEY_SECRET:-}
       PAYMENT_EVENT_STORE: /data/payment-events
     volumes:
       - payment_events:/data/payment-events

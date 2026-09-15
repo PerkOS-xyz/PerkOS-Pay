@@ -1,7 +1,9 @@
 import Link from "next/link";
 
 import { getRuntimeConfig } from "@/lib/runtime";
+import { cdpCredentials } from "@/lib/cdp";
 import { fetchBillingSession, isSessionId, shortWallet } from "@/lib/session";
+import { OnrampBuy } from "./OnrampBuy";
 import { UsdcPay } from "./UsdcPay";
 
 export const dynamic = "force-dynamic";
@@ -43,6 +45,8 @@ export default async function SessionPage({
 
   const funded = session.infra.allowed;
   const expired = session.status === "expired";
+  // Only offer card-to-USDC where the server can actually mint a session token.
+  const onrampAvailable = cdpCredentials() !== null;
 
   return (
     <main>
@@ -107,9 +111,14 @@ export default async function SessionPage({
           <div className="payment-methods">
             <div className="primary method-label">Card · Stripe Checkout</div>
             <div className="method-label secondary">USDC on Base · no gas</div>
+            {onrampAvailable ? <div className="method-label secondary">Card → USDC · Coinbase</div> : null}
           </div>
 
           {live && !expired ? <UsdcPay sessionId={session.sessionId} wallet={session.wallet} /> : null}
+
+          {live && !expired && onrampAvailable ? (
+            <OnrampBuy sessionId={session.sessionId} wallet={session.wallet} />
+          ) : null}
 
           {live && !expired ? (
             <form className="coupon" action={`/api/session/${session.sessionId}/coupon`} method="post">
