@@ -18,6 +18,7 @@
     "verify": "npm run lint && npm run typecheck && npm test && npm run build"
   },
   "dependencies": {
+    "jose": "6.2.12",
     "next": "16.2.6",
     "react": "19.2.4",
     "react-dom": "19.2.4",

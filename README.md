@@ -13,6 +13,19 @@ PerkOS Pay does **not** own identity, balances, ledger entries, usage metering,
 or entitlements. Those remain in PerkOS API. Stripe collects card payments and
 PerkOS Stack verifies and settles supported crypto payments.
 
+## Coinbase Onramp
+
+`POST /api/session/{sessionId}/onramp` mints a Coinbase Onramp session token and
+returns the hosted URL. It is the path for someone holding a card but no
+stablecoins: Apple Pay, Google Pay or a debit card buys USDC on Base **into the
+person's own wallet**, and they then fund credits with it through the x402
+route. Pay credits nothing here; the ledger is still only touched by the API.
+
+The destination is the wallet PerkOS API put on the billing session, never an
+address read off the request body, so a session link cannot buy into a third
+party's wallet. `CDP_API_KEY_ID` and `CDP_API_KEY_SECRET` are server-only; while
+they are unset the route answers `503` and the option stays hidden in the UI.
+
 ## Current status
 
 Stripe Test Checkout and a signature-verified, idempotent webhook are available
