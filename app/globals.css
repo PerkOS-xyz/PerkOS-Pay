@@ -94,3 +94,15 @@ footer { width: min(1120px, calc(100% - 40px)); margin: auto auto 0; padding: 24
   .payment-methods { grid-template-columns: 1fr; }
   footer { flex-direction: column; }
 }
+
+/* Billing session page (/s/<id>): USDC rail under the card packs. */
+.intro code { font-family: ui-monospace, monospace; font-size: 0.92em; padding: 2px 6px; border-radius: 6px; background: rgba(255,255,255,.06); border: 1px solid var(--border); }
+.usdc { margin-top: 14px; padding: 16px; border: 1px solid var(--border); border-radius: 14px; background: rgba(255,255,255,.02); }
+.usdc-row { display: flex; gap: 10px; align-items: end; flex-wrap: wrap; }
+.usdc-row label { display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--muted); }
+.usdc-row select { min-height: 44px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--panel-strong); color: var(--text); }
+.usdc-row button { min-height: 44px; padding: 0 18px; border-radius: 12px; font-weight: 750; flex: 1; }
+.usdc-hint { color: var(--muted); font-size: 12px; margin: 10px 0 0; }
+.usdc-hint a { color: var(--text); }
+.usdc-ok { color: var(--mint); font-size: 13px; margin: 10px 0 0; }
+.usdc-err { color: var(--pink); font-size: 13px; margin: 10px 0 0; }
